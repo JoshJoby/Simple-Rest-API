@@ -69,11 +69,32 @@ func updateTodoStatus(context *gin.Context) { //function to update status of tod
 	context.IndentedJSON(http.StatusOK, todos)
 }
 
+func deleteTodo(context *gin.Context) { //function to delete todo, return in json
+	id := context.Param("id")
+	_, err := getTodoByID(id)
+	index := 0
+
+	for i, t := range todos {
+		if t.ID == id {
+			index = i
+			break
+		}
+	}
+
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "todo not found"})
+		return
+	}
+	todos = append(todos[:index], todos[index+1:]...)
+	context.IndentedJSON(http.StatusOK, todos)
+}
+
 func main() { //main method to call all API functions
 	router := gin.Default()
 	router.GET("/todos", getTodos)
 	router.GET("/todos/:id", getSingleTodo)
 	router.PUT("/todos/:id", updateTodoStatus)
+	router.DELETE("/todos/:id", deleteTodo)
 	router.POST("/todos", addTodo)
 	router.Run("localhost:9090")
 }
